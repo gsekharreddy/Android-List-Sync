@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
+    android:orientation="vertical"
+    tools:context=".AddTaskActivity">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Add New Task"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <!-- Glass Card for the form -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:cardBackgroundColor="#60FFFFFF"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Compulsory Task Text Input -->
+            <EditText
+                android:id="@+id/etTaskText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edittext_background"
+                android:gravity="top"
+                android:hint="Enter your task description..."
+                android:inputType="textMultiLine"
+                android:minLines="4"
+                android:padding="14dp"
+                android:textColor="@color/white"
+                android:textColorHint="#E0E0E0" />
+
+            <!-- Image Preview - shown after an image is selected -->
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/edittext_background"
+                android:contentDescription="Selected image preview"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Add Image Button -->
+            <Button
+                android:id="@+id/btnAddImage"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="12dp"
+                android:text="Add Optional Image"
+                android:textColor="@color/white"
+                app:strokeColor="@color/white" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:indeterminateTint="@color/white"
+        android:visibility="gone" />
+
+    <!-- Spacer to push the save button to the bottom -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/btnSaveTask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="24dp"
+        android:background="@drawable/button_background"
+        android:text="Save Task"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

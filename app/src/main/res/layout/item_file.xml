@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="#80FFFFFF"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Image Preview -->
+        <ImageView
+            android:id="@+id/file_image_preview"
+            android:layout_width="0dp"
+            android:layout_height="180dp"
+            android:contentDescription="Image Preview"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/backgrounds/scenic"
+            tools:visibility="visible" />
+
+        <!-- Text File Icon -->
+        <ImageView
+            android:id="@+id/file_icon_image_view"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_text_file"
+            app:layout_constraintBottom_toBottomOf="@+id/file_name_text_view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/file_name_text_view"
+            app:tint="#222222" />
+
+        <!-- File Name -->
+        <TextView
+            android:id="@+id/file_name_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="#222222"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/file_icon_image_view"
+            app:layout_constraintTop_toBottomOf="@id/file_image_preview"
+            tools:text="My synced file name.txt" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

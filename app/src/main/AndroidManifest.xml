@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Internet permission is required for Firebase to work -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- The android:name attribute is crucial for initializing Firebase App Check -->
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,16 +15,41 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ListSync">
+        android:theme="@style/Theme.ListSync"
+        tools:targetApi="31">
+
+        <!--
+         MainActivity is now the LAUNCHER activity.
+         It will be the first screen to open. If the user is not logged in,
+         it will redirect to LoginActivity.
+        -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.ListSync">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+         LoginActivity is declared here as a regular activity
+         so that MainActivity can open it without crashing.
+        -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
+
+        <!--
+         AddTaskActivity is also declared so the app knows it exists.
+        -->
+        <activity
+            android:name=".AddTaskActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
+
     </application>
 
 </manifest>

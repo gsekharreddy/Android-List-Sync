@@ -1,1 +1,33 @@
+gitignore
+# Generated files
 /build
+/.gradle
+/captures
+
+# Local configuration files (should not be shared)
+local.properties
+/.idea/workspace.xml
+/.idea/libraries/
+/.idea/gradle.xml # Often user-specific, but sometimes shared if consistent across team
+# You can be more granular with .idea if needed, but ignoring the whole folder is common.
+# If you want to share run configurations or code styles, you'd un-ignore those specific files.
+
+# IntelliJ module files
+*.iml
+
+# Keystore files (NEVER commit these)
+*.jks
+*.keystore
+
+# Secrets
+secrets.properties
+
+# Log files
+*.log
+
+# macOS
+.DS_Store
+
+# Android Studio Profiling
+*.hprof
+*.snapshot
