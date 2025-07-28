@@ -187,8 +187,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 						Toast.makeText(this, "Local data cleared.", Toast.LENGTH_SHORT).show();
 					}
 				})
+
 				.setNegativeButton("Cancel", null)
+
 				.setIcon(R.drawable.ic_delete)
+
 				.show();
 	}
 
