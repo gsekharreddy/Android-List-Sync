@@ -49,7 +49,10 @@
             android:name=".AddTaskActivity"
             android:exported="false"
             android:theme="@style/Theme.ListSync" />
-
+        <activity
+            android:name=".TaskDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
     </application>
 
 </manifest>

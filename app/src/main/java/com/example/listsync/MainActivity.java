@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -38,6 +41,7 @@ import com.google.firebase.firestore.Query;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
@@ -50,10 +54,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private DrawerLayout drawerLayout;
 	private RecyclerView recyclerView;
 	private FloatingActionButton fab;
+	private FloatingActionButton fabDeleteLocal;
 	private TextView emptyView;
 	private SwipeRefreshLayout swipeRefreshLayout;
 	private TaskAdapter adapter;
-	private List<TaskItem> taskList;
+	private List<TaskItem> taskList; // Master list of all tasks from Firestore
+	private List<TaskItem> filteredTaskList; // List that is displayed (for search results)
 
 	// Firebase
 	private FirebaseAuth mAuth;
@@ -66,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		// Firebase Init
 		mAuth = FirebaseAuth.getInstance();
 		db = FirebaseFirestore.getInstance();
 		currentUser = mAuth.getCurrentUser();
@@ -104,10 +109,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		recyclerView = findViewById(R.id.recyclerView);
 		emptyView = findViewById(R.id.empty_view);
 		fab = findViewById(R.id.fab);
+		fabDeleteLocal = findViewById(R.id.fab_delete_local);
 
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		taskList = new ArrayList<>();
-		adapter = new TaskAdapter(taskList, this);
+		filteredTaskList = new ArrayList<>();
+		adapter = new TaskAdapter(filteredTaskList, this); // Adapter now uses the filtered list
 		recyclerView.setAdapter(adapter);
 	}
 
@@ -123,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		drawerLayout.addDrawerListener(toggle);
 		toggle.syncState();
 
-		// Update Nav Header with user info
 		updateNavHeader();
 	}
 
@@ -136,9 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		if (currentUser != null) {
 			navUserEmail.setText(currentUser.getEmail());
 			if (currentUser.getPhotoUrl() != null) {
-				Glide.with(this)
-						.load(currentUser.getPhotoUrl())
-						.into(navProfileImage);
+				Glide.with(this).load(currentUser.getPhotoUrl()).into(navProfileImage);
 			}
 		}
 	}
@@ -167,9 +171,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		}
 	}
 
-	// --- All other methods (setupFab, setupSwipeToRefresh, etc.) remain the same ---
 	private void setupFab() {
 		fab.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, AddTaskActivity.class)));
+		fabDeleteLocal.setOnClickListener(v -> showDeleteLocalDataConfirmationDialog());
+	}
+
+	private void showDeleteLocalDataConfirmationDialog() {
+		new AlertDialog.Builder(this)
+				.setTitle("Clear Local Data")
+				.setMessage("Are you sure you want to clear all tasks from this device? This will not affect your data on the server.")
+				.setPositiveButton("Clear", (dialog, which) -> {
+					if (taskList != null && adapter != null) {
+						taskList.clear();
+						filterTasks(""); // Refresh the filtered list to be empty
+						Toast.makeText(this, "Local data cleared.", Toast.LENGTH_SHORT).show();
+					}
+				})
+				.setNegativeButton("Cancel", null)
+				.setIcon(R.drawable.ic_delete)
+				.show();
 	}
 
 	private void setupSwipeToRefresh() {
@@ -189,15 +209,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			@Override
 			public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 				int position = viewHolder.getAdapterPosition();
-				TaskItem deletedTask = taskList.get(position);
+				TaskItem deletedTask = filteredTaskList.get(position); // Get from the displayed list
 
-				taskList.remove(position);
+				// Remove from both lists to maintain consistency
+				filteredTaskList.remove(position);
+				taskList.remove(deletedTask);
 				adapter.notifyItemRemoved(position);
 
 				Snackbar.make(recyclerView, "Task deleted", Snackbar.LENGTH_LONG)
 						.setAction("Undo", v -> {
-							taskList.add(position, deletedTask);
-							adapter.notifyItemInserted(position);
+							// Add back to the master list and re-filter
+							taskList.add(deletedTask);
+							filterTasks(""); // Re-filter to get correct position and sorting
 						})
 						.addCallback(new Snackbar.Callback() {
 							@Override
@@ -232,9 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 						deleteImageFromCloudinary(task.getImageUrl());
 					}
 				})
-				.addOnFailureListener(e -> {
-					Log.w(TAG, "Error deleting task from Firestore", e);
-				});
+				.addOnFailureListener(e -> Log.w(TAG, "Error deleting task from Firestore", e));
 	}
 
 	private void deleteImageFromCloudinary(String imageUrl) {
@@ -252,8 +273,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private void listenForTaskChanges() {
 		swipeRefreshLayout.setRefreshing(true);
 		Query query = db.collection("tasks")
-				.whereEqualTo("userId", currentUser.getUid())
-				.orderBy("timestamp", Query.Direction.DESCENDING);
+				.whereEqualTo("userId", currentUser.getUid());
 
 		firestoreListener = query.addSnapshotListener((snapshots, e) -> {
 			swipeRefreshLayout.setRefreshing(false);
@@ -271,19 +291,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 						taskList.add(task);
 					}
 				}
-				adapter.notifyDataSetChanged();
-				updateEmptyView();
+				filterTasks(""); // Initial sort and display
 			}
 		});
 	}
 
+	private void filterTasks(String query) {
+		filteredTaskList.clear();
+		List<TaskItem> completed = new ArrayList<>();
+		List<TaskItem> incomplete = new ArrayList<>();
+
+		for (TaskItem task : taskList) {
+			if (task.getTaskText().toLowerCase().contains(query.toLowerCase())) {
+				if (task.isCompleted()) {
+					completed.add(task);
+				} else {
+					incomplete.add(task);
+				}
+			}
+		}
+
+		// Sort both lists by timestamp (newest first)
+		Collections.sort(incomplete, (t1, t2) -> t2.getTimestamp().compareTo(t1.getTimestamp()));
+		Collections.sort(completed, (t1, t2) -> t2.getTimestamp().compareTo(t1.getTimestamp()));
+
+		// Add incomplete tasks first, then completed tasks
+		filteredTaskList.addAll(incomplete);
+		filteredTaskList.addAll(completed);
+
+		adapter.notifyDataSetChanged();
+		updateEmptyView();
+	}
+
 	private void updateEmptyView() {
-		if (taskList.isEmpty()) {
+		if (filteredTaskList.isEmpty()) {
 			recyclerView.setVisibility(View.GONE);
 			emptyView.setVisibility(View.VISIBLE);
 		} else {
 			recyclerView.setVisibility(View.VISIBLE);
 			emptyView.setVisibility(View.GONE);
 		}
+	}
+
+	// --- NEW: Inflate the menu with the search icon ---
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main_menu, menu);
+		MenuItem searchItem = menu.findItem(R.id.action_search);
+		SearchView searchView = (SearchView) searchItem.getActionView();
+
+		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				return false;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				filterTasks(newText); // Filter the list as the user types
+				return true;
+			}
+		});
+		return true;
 	}
 }

@@ -1,11 +1,14 @@
 package com.example.listsync.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.listsync.R;
+import com.example.listsync.TaskDetailActivity;
 import com.example.listsync.model.TaskItem;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -40,25 +45,40 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 	public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
 		TaskItem currentTask = taskList.get(position);
 
-		// Use the correct getter: getTaskText()
 		holder.taskTextView.setText(currentTask.getTaskText());
+		holder.completedCheckbox.setChecked(currentTask.isCompleted());
 
-		// Check if there is an image URL
-		if (currentTask.getImageUrl() != null && !currentTask.getImageUrl().isEmpty()) {
-			// If yes, show the image preview and load the image with Glide
-			holder.taskImagePreview.setVisibility(View.VISIBLE);
-			holder.taskIcon.setVisibility(View.GONE);
-			Glide.with(context)
-					.load(currentTask.getImageUrl())
-					.into(holder.taskImagePreview);
+		// Apply visual change based on completion
+		if (currentTask.isCompleted()) {
+			holder.taskTextView.setPaintFlags(holder.taskTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+			holder.itemView.setAlpha(0.7f);
 		} else {
-			// If no, show the text icon and hide the image preview
-			holder.taskImagePreview.setVisibility(View.GONE);
-			holder.taskIcon.setVisibility(View.VISIBLE);
+			holder.taskTextView.setPaintFlags(holder.taskTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+			holder.itemView.setAlpha(1.0f);
 		}
 
-		// Apply animation
+		if (currentTask.getImageUrl() != null && !currentTask.getImageUrl().isEmpty()) {
+			holder.taskImagePreview.setVisibility(View.VISIBLE);
+			Glide.with(context).load(currentTask.getImageUrl()).into(holder.taskImagePreview);
+		} else {
+			holder.taskImagePreview.setVisibility(View.GONE);
+		}
+
 		setAnimation(holder.itemView, position);
+
+		holder.itemView.setOnClickListener(v -> {
+			Intent intent = new Intent(context, TaskDetailActivity.class);
+			intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, currentTask.getDocumentId());
+			intent.putExtra(TaskDetailActivity.EXTRA_TASK_TEXT, currentTask.getTaskText());
+			intent.putExtra(TaskDetailActivity.EXTRA_IMAGE_URL, currentTask.getImageUrl());
+			context.startActivity(intent);
+		});
+
+		holder.completedCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			// Update Firestore when checkbox is toggled
+			FirebaseFirestore.getInstance().collection("tasks").document(currentTask.getDocumentId())
+					.update("completed", isChecked);
+		});
 	}
 
 	private void setAnimation(View viewToAnimate, int position) {
@@ -75,17 +95,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 	}
 
 	public static class TaskViewHolder extends RecyclerView.ViewHolder {
-		// Renamed for clarity to match the new item_file.xml IDs
 		public TextView taskTextView;
 		public ImageView taskImagePreview;
-		public ImageView taskIcon;
+		public CheckBox completedCheckbox;
 
 		public TaskViewHolder(@NonNull View itemView) {
 			super(itemView);
-			// Make sure these IDs match your item_file.xml
 			taskTextView = itemView.findViewById(R.id.file_name_text_view);
 			taskImagePreview = itemView.findViewById(R.id.file_image_preview);
-			taskIcon = itemView.findViewById(R.id.file_icon_image_view);
+			completedCheckbox = itemView.findViewById(R.id.checkbox_completed);
 		}
 	}
 }

@@ -84,4 +84,19 @@
         app:srcCompat="@drawable/ic_add"
         app:tint="#4A00E0" />
 
+    <!-- NEW: Button to delete all local data -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_delete_local"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:layout_marginStart="328dp"
+        android:layout_marginBottom="668dp"
+        android:contentDescription="Delete Local Data"
+        app:backgroundTint="@color/red"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_delete"
+        app:tint="@color/white" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

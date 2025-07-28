@@ -3,14 +3,14 @@ package com.example.listsync.model;
 import com.google.firebase.firestore.Exclude;
 
 public class TaskItem {
-	// This field will hold the unique ID of the Firestore document
-	@Exclude // This tells Firestore not to try and save this field back to the DB
+	@Exclude
 	private String documentId;
 
 	private String taskText;
 	private String imageUrl;
 	private Long timestamp;
 	private String userId;
+	private boolean completed; // NEW: To track completion status
 
 	public TaskItem() {}
 
@@ -35,8 +35,16 @@ public class TaskItem {
 		return userId;
 	}
 
-	// --- Setter ---
+	public boolean isCompleted() { // NEW
+		return completed;
+	}
+
+	// --- Setters ---
 	public void setDocumentId(String documentId) {
 		this.documentId = documentId;
+	}
+
+	public void setCompleted(boolean completed) { // NEW
+		this.completed = completed;
 	}
 }
