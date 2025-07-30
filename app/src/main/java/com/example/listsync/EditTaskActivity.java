@@ -53,17 +53,57 @@ public class EditTaskActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_edit_task);
 
-		initializeViews();
+		if (!initializeViewsAndCheck()) {
+			// If any view is not found, stop execution.
+			return;
+		}
+
 		loadInitialData();
 		setupClickListeners();
 	}
 
-	private void initializeViews() {
+	private boolean initializeViewsAndCheck() {
 		etTaskText = findViewById(R.id.etTaskText);
+		if (etTaskText == null) {
+			Log.e(TAG, "FATAL ERROR: EditText with ID 'etTaskText' not found in layout. Check your XML.");
+			finishWithError();
+			return false;
+		}
+
 		imagePreview = findViewById(R.id.imagePreview);
+		if (imagePreview == null) {
+			Log.e(TAG, "FATAL ERROR: ImageView with ID 'imagePreview' not found in layout. Check your XML.");
+			finishWithError();
+			return false;
+		}
+
 		btnAddImage = findViewById(R.id.btnAddImage);
+		if (btnAddImage == null) {
+			Log.e(TAG, "FATAL ERROR: Button with ID 'btnAddImage' not found in layout. Check your XML.");
+			finishWithError();
+			return false;
+		}
+
 		btnUpdateTask = findViewById(R.id.btnUpdateTask);
+		if (btnUpdateTask == null) {
+			Log.e(TAG, "FATAL ERROR: Button with ID 'btnUpdateTask' not found in layout. Check your XML.");
+			finishWithError();
+			return false;
+		}
+
 		progressBar = findViewById(R.id.progressBar);
+		if (progressBar == null) {
+			Log.e(TAG, "FATAL ERROR: ProgressBar with ID 'progressBar' not found in layout. Check your XML.");
+			finishWithError();
+			return false;
+		}
+
+		return true;
+	}
+
+	private void finishWithError() {
+		Toast.makeText(this, "A layout error occurred.", Toast.LENGTH_LONG).show();
+		finish();
 	}
 
 	private void loadInitialData() {
@@ -71,7 +111,20 @@ public class EditTaskActivity extends AppCompatActivity {
 		initialTaskText = getIntent().getStringExtra(EXTRA_TASK_TEXT);
 		initialImageUrl = getIntent().getStringExtra(EXTRA_IMAGE_URL);
 
-		etTaskText.setText(initialTaskText);
+		// --- UPDATED: Add null checks to prevent crashes ---
+		// The Task ID is essential. If it's missing, we can't do anything.
+		if (taskId == null || taskId.isEmpty()) {
+			Toast.makeText(this, "Error: Task ID is missing. Cannot edit.", Toast.LENGTH_LONG).show();
+			Log.e(TAG, "FATAL ERROR: Task ID was not passed to EditTaskActivity.");
+			finish(); // Exit the activity because it's in an invalid state.
+			return;
+		}
+
+		// Check for null text before trying to set it.
+		if (initialTaskText != null) {
+			etTaskText.setText(initialTaskText);
+		}
+
 		if (initialImageUrl != null && !initialImageUrl.isEmpty()) {
 			imagePreview.setVisibility(View.VISIBLE);
 			Glide.with(this).load(initialImageUrl).into(imagePreview);
@@ -93,10 +146,8 @@ public class EditTaskActivity extends AppCompatActivity {
 		showLoading(true);
 
 		if (newImageUri != null) {
-			// If a new image was selected, upload it first
 			uploadNewImageAndUpdate(updatedText);
 		} else {
-			// Otherwise, just update the text
 			updateFirestore(updatedText, initialImageUrl);
 		}
 	}
@@ -113,7 +164,6 @@ public class EditTaskActivity extends AppCompatActivity {
 				Toast.makeText(EditTaskActivity.this, "Image upload failed", Toast.LENGTH_SHORT).show();
 				showLoading(false);
 			}
-			// Other callbacks omitted for brevity
 			@Override
 			public void onStart(String requestId) {}
 			@Override

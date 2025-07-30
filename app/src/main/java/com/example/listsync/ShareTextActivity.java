@@ -30,7 +30,7 @@ public class ShareTextActivity extends AppCompatActivity {
 
 	private FirebaseFirestore db;
 	private String shareCode;
-	private String sessionName; // To store the user's name
+	private String sessionName;
 	private ListenerRegistration sessionListener;
 
 	@Override
@@ -101,11 +101,15 @@ public class ShareTextActivity extends AppCompatActivity {
 	private void displayMessages(List<Map<String, Object>> messages) {
 		SpannableStringBuilder builder = new SpannableStringBuilder();
 		for (Map<String, Object> msgMap : messages) {
-			// Manually convert map back to ChatMessage object
-			ChatMessage msg = new ChatMessage(
-					(String) msgMap.get("text"),
-					(String) msgMap.get("senderName")
-			);
+			// CORRECTED: Reconstruct the ChatMessage object properly
+			ChatMessage msg = new ChatMessage();
+			msg.setText((String) msgMap.get("text"));
+			msg.setSenderName((String) msgMap.get("senderName"));
+			// Firestore stores numbers as Long, so we need to handle that
+			Object timestampObj = msgMap.get("timestamp");
+			if (timestampObj instanceof Long) {
+				msg.setTimestamp((Long) timestampObj);
+			}
 
 			String header = msg.getSenderName() + " (" + msg.getFormattedTime() + ")\n";
 			String body = msg.getText() + "\n\n";
@@ -121,8 +125,9 @@ public class ShareTextActivity extends AppCompatActivity {
 
 	private void sendMessage(String text) {
 		ChatMessage message = new ChatMessage(text, sessionName);
+		// CORRECTED: Convert the message object to a Map before sending
 		db.collection("sharing_sessions").document(shareCode)
-				.update("messages", FieldValue.arrayUnion(message))
+				.update("messages", FieldValue.arrayUnion(message.toMap()))
 				.addOnSuccessListener(aVoid -> etTextToShare.setText(""))
 				.addOnFailureListener(e -> Toast.makeText(this, "Failed to send message.", Toast.LENGTH_SHORT).show());
 	}

@@ -81,6 +81,7 @@
                         android:layout_marginTop="24dp"
                         android:orientation="horizontal">
 
+                        <!-- THIS IS THE EDIT BUTTON -->
                         <Button
                             android:id="@+id/btn_edit_task"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
