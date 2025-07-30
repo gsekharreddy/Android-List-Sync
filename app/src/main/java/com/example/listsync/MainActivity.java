@@ -51,7 +51,7 @@ import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	private static final String TAG = "MainActivity";
-	// NEW: For saving theme preference
+	// For saving theme preference
 	private static final String PREFS_NAME = "ThemePrefs";
 	private static final String THEME_KEY = "ThemeMode";
 
@@ -74,9 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// NEW: Apply saved theme before setting content view
 		applyTheme();
-
 		setContentView(R.layout.activity_main);
 
 		mAuth = FirebaseAuth.getInstance();
@@ -96,9 +94,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		setupItemTouchHelper();
 	}
 
-	// --- All other lifecycle methods (onStart, onStop) remain the same ---
-
-	// --- NEW: Theme handling logic ---
 	private void applyTheme() {
 		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		int themeMode = prefs.getInt(THEME_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -110,14 +105,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		int newNightMode;
 
 		if (currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
-			newNightMode = AppCompatDelegate.MODE_NIGHT_NO; // Switch to light
+			newNightMode = AppCompatDelegate.MODE_NIGHT_NO;
 		} else {
-			newNightMode = AppCompatDelegate.MODE_NIGHT_YES; // Switch to dark
+			newNightMode = AppCompatDelegate.MODE_NIGHT_YES;
 		}
 
 		AppCompatDelegate.setDefaultNightMode(newNightMode);
 
-		// Save the new preference
 		SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
 		editor.putInt(THEME_KEY, newNightMode);
 		editor.apply();
@@ -131,15 +125,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			startActivity(new Intent(MainActivity.this, LoginActivity.class));
 			finish();
 		} else if (id == R.id.nav_toggle_theme) {
-			// Call the new toggle method
 			toggleTheme();
+		} else if (id == R.id.nav_share) {
+			startActivity(new Intent(MainActivity.this, ShareActivity.class));
+		} else if (id == R.id.fab_delete_local) {
+			showDeleteLocalDataConfirmationDialog();
 		}
 
 		drawerLayout.closeDrawer(GravityCompat.START);
 		return true;
 	}
 
-	// --- All other methods remain the same ---
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -385,4 +381,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		});
 		return true;
 	}
+
+	// This method is no longer needed as there are no custom action items in the toolbar
+	// @Override
+	// public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+	//     if (item.getItemId() == R.id.action_share_text) {
+	//         startActivity(new Intent(this, ShareTextActivity.class));
+	//         return true;
+	//     }
+	//     return super.onOptionsItemSelected(item);
+	// }
 }

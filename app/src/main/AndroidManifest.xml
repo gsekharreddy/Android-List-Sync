@@ -54,7 +54,15 @@
             android:exported="false"
             android:theme="@style/Theme.ListSync" />
         <activity
+            android:name=".ShareActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
+        <activity
             android:name=".TaskDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
+        <activity
+            android:name=".ShareTextActivity"
             android:exported="false"
             android:theme="@style/Theme.ListSync" />
     </application>

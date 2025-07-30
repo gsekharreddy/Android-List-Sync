@@ -9,6 +9,10 @@
             android:icon="@drawable/ic_dark_mode"
             android:title="Toggle Theme" />
         <item
+            android:id="@+id/nav_share"
+            android:icon="@drawable/ic_share"
+            android:title="Create or join Share" />
+        <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout"
             android:title="Logout" />
