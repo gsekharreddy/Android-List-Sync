@@ -11,9 +11,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/listsynclogo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/listsynclogo"
         android:supportsRtl="true"
         android:theme="@style/Theme.ListSync"
         tools:targetApi="31">
@@ -47,6 +47,10 @@
         -->
         <activity
             android:name=".AddTaskActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
+        <activity
+            android:name=".EditTaskActivity"
             android:exported="false"
             android:theme="@style/Theme.ListSync" />
         <activity
