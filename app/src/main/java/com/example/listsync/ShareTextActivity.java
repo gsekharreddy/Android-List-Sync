@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 public class ShareTextActivity extends AppCompatActivity {
 
+	private static final String TAG = "ShareTextActivity"; // Added TAG for logging
 	private EditText etTextToShare;
 	private Button btnShareText;
 	private TextView tvSharedContent, tvShareCode;
@@ -82,6 +84,7 @@ public class ShareTextActivity extends AppCompatActivity {
 		sessionListener = db.collection("sharing_sessions").document(shareCode)
 				.addSnapshotListener((snapshot, e) -> {
 					if (e != null) {
+						Log.w(TAG, "Listen failed.", e); // Log the full error
 						Toast.makeText(this, "Listen failed.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -101,11 +104,9 @@ public class ShareTextActivity extends AppCompatActivity {
 	private void displayMessages(List<Map<String, Object>> messages) {
 		SpannableStringBuilder builder = new SpannableStringBuilder();
 		for (Map<String, Object> msgMap : messages) {
-			// CORRECTED: Reconstruct the ChatMessage object properly
 			ChatMessage msg = new ChatMessage();
 			msg.setText((String) msgMap.get("text"));
 			msg.setSenderName((String) msgMap.get("senderName"));
-			// Firestore stores numbers as Long, so we need to handle that
 			Object timestampObj = msgMap.get("timestamp");
 			if (timestampObj instanceof Long) {
 				msg.setTimestamp((Long) timestampObj);
@@ -114,7 +115,6 @@ public class ShareTextActivity extends AppCompatActivity {
 			String header = msg.getSenderName() + " (" + msg.getFormattedTime() + ")\n";
 			String body = msg.getText() + "\n\n";
 
-			// Make the header bold
 			builder.append(header);
 			builder.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), builder.length() - header.length(), builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			builder.append(body);
@@ -125,10 +125,13 @@ public class ShareTextActivity extends AppCompatActivity {
 
 	private void sendMessage(String text) {
 		ChatMessage message = new ChatMessage(text, sessionName);
-		// CORRECTED: Convert the message object to a Map before sending
 		db.collection("sharing_sessions").document(shareCode)
 				.update("messages", FieldValue.arrayUnion(message.toMap()))
 				.addOnSuccessListener(aVoid -> etTextToShare.setText(""))
-				.addOnFailureListener(e -> Toast.makeText(this, "Failed to send message.", Toast.LENGTH_SHORT).show());
+				.addOnFailureListener(e -> {
+					// --- UPDATED: Add detailed logging ---
+					Log.e(TAG, "Failed to send message to Firestore", e); // This will print the full error to Logcat
+					Toast.makeText(this, "Failed to send message.", Toast.LENGTH_LONG).show();
+				});
 	}
 }
