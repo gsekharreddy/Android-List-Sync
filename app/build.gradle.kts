@@ -31,6 +31,8 @@ android {
         buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProperties.getProperty("CLOUDINARY_CLOUD_NAME")}\"")
         buildConfigField("String", "CLOUDINARY_API_KEY", "\"${localProperties.getProperty("CLOUDINARY_API_KEY")}\"")
         buildConfigField("String", "CLOUDINARY_API_SECRET", "\"${localProperties.getProperty("CLOUDINARY_API_SECRET")}\"")
+        // ADDED: Make the Gemini API Key available
+        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY")}\"")
     }
 
     buildTypes {
@@ -66,9 +68,14 @@ dependencies {
     implementation("it.xabaras.android:recyclerview-swipedecorator:1.4")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.ai.client.generativeai:generativeai:0.5.0")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.cloudinary:cloudinary-android:2.4.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // ADDED: Google Guava library, required for Gemini SDK's async operations
+    implementation("com.google.guava:guava:32.1.3-android")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
