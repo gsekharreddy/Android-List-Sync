@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private DrawerLayout drawerLayout;
 	private RecyclerView recyclerView;
 	private FloatingActionButton fab;
-	private FloatingActionButton fabDeleteLocal;
+	private FloatingActionButton fabDeleteLocal, fabMagic;
 	private TextView emptyView;
 	private SwipeRefreshLayout swipeRefreshLayout;
 	private TaskAdapter adapter;
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		emptyView = findViewById(R.id.empty_view);
 		fab = findViewById(R.id.fab);
 		fabDeleteLocal = findViewById(R.id.fab_delete_local);
-
+		fabMagic = findViewById(R.id.fab_magic); // Find the magic button
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		taskList = new ArrayList<>();
 		filteredTaskList = new ArrayList<>();
@@ -206,6 +206,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private void setupFab() {
 		fab.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, AddTaskActivity.class)));
 		fabDeleteLocal.setOnClickListener(v -> showDeleteLocalDataConfirmationDialog());
+
+		fabMagic.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, MagicInputActivity.class)));
+
 	}
 
 	private void showDeleteLocalDataConfirmationDialog() {
