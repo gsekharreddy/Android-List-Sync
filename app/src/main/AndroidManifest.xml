@@ -65,6 +65,10 @@
             android:name=".ShareTextActivity"
             android:exported="false"
             android:theme="@style/Theme.ListSync" />
+        <activity
+            android:name=".MagicInputActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ListSync" />
     </application>
 
 </manifest>
